@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Meta tag per l'esecuzione a schermo intero su Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    <title>Tempi Ricarica</title>
+    <!-- Utilizza Tailwind CSS per l'interfaccia via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <h1 class="text-2xl font-bold text-slate-800 mb-6 text-center">Calcolatore Ricarica</h1>
+        
+        <div class="space-y-6">
+            <!-- Partenza -->
+            <div>
+                <div class="flex justify-between mb-1">
+                    <label class="text-sm font-medium text-slate-600">Partenza</label>
+                    <span id="startVal" class="text-sm font-bold text-blue-600">20%</span>
+                </div>
+                <input type="range" id="start" min="0" max="99" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Arrivo -->
+            <div>
+                <div class="flex justify-between mb-1">
+                    <label class="text-sm font-medium text-slate-600">Arrivo</label>
+                    <span id="endVal" class="text-sm font-bold text-blue-600">80%</span>
+                </div>
+                <input type="range" id="end" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Potenza -->
+            <div>
+                <div class="flex justify-between mb-1">
+                    <label class="text-sm font-medium text-slate-600">Potenza Erogata</label>
+                    <span id="powerVal" class="text-sm font-bold text-blue-600">6.0 kW</span>
+                </div>
+                <input type="range" id="power" min="2" max="7.4" step="0.1" value="6.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+
+        <div class="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-100 text-center">
+            <p class="text-sm text-slate-500 mb-1">Tempo stimato (50 kWh)</p>
+            <p id="result" class="text-3xl font-extrabold text-blue-700">00h 00m</p>
+        </div>
+    </div>
+
+    <script>
+        const capacity = 50; // kWh della batteria
+        const efficiency = 0.90; // Efficienza di trasformazione AC/DC
+
+        const startSlider = document.getElementById('start');
+        const endSlider = document.getElementById('end');
+        const powerSlider = document.getElementById('power');
+        const resultText = document.getElementById('result');
+
+        function calculate() {
+            let start = parseInt(startSlider.value);
+            let end = parseInt(endSlider.value);
+            let power = parseFloat(powerSlider.value);
+
+            if (start >= end) {
+                start = end - 1;
+                startSlider.value = start;
+            }
+
+            document.getElementById('startVal').innerText = start + '%';
+            document.getElementById('endVal').innerText = end + '%';
+            document.getElementById('powerVal').innerText = power.toFixed(1) + ' kW';
+
+            const energyNeeded = capacity * (end - start) / 100;
+            const hoursDec = energyNeeded / (power * efficiency);
+            
+            const hours = Math.floor(hoursDec);
+            const minutes = Math.round((hoursDec - hours) * 60);
+
+            resultText.innerText = `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+        }
+
+        [startSlider, endSlider, powerSlider].forEach(el => {
+            el.addEventListener('input', calculate);
+        });
+
+        calculate();
+    </script>
+</body>
+</html>
