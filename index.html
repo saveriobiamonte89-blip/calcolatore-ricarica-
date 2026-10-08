@@ -1,91 +1,169 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Meta tag per l'esecuzione a schermo intero su Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2563eb">
-    <title>Tempi Ricarica</title>
-    <!-- Utilizza Tailwind CSS per l'interfaccia via CDN -->
+    <title>Calcolatore Ricarica EV</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Personalizzazione slider per renderli più spessi e facili da usare su mobile */
+        input[type=range] {
+            accent-color: #2563eb;
+        }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <h1 class="text-2xl font-bold text-slate-800 mb-6 text-center">Calcolatore Ricarica</h1>
+<body class="bg-slate-100 min-h-screen p-4 flex flex-col items-center font-sans">
+    
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-lg overflow-hidden">
         
-        <div class="space-y-6">
-            <!-- Partenza -->
-            <div>
-                <div class="flex justify-between mb-1">
-                    <label class="text-sm font-medium text-slate-600">Partenza</label>
-                    <span id="startVal" class="text-sm font-bold text-blue-600">20%</span>
-                </div>
-                <input type="range" id="start" min="0" max="99" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-            </div>
+        <!-- Header principale con tempo stimato -->
+        <div class="bg-blue-600 text-white p-6 text-center">
+            <h2 class="text-blue-100 text-sm font-semibold uppercase tracking-wider mb-2">Tempo di ricarica stimato</h2>
+            <div id="timeResult" class="text-5xl font-extrabold mb-1">0h 00m</div>
+            <div id="kwhResultTop" class="text-blue-200 text-lg font-medium">+0.0 kWh</div>
+        </div>
 
-            <!-- Arrivo -->
-            <div>
-                <div class="flex justify-between mb-1">
-                    <label class="text-sm font-medium text-slate-600">Arrivo</label>
-                    <span id="endVal" class="text-sm font-bold text-blue-600">80%</span>
-                </div>
-                <input type="range" id="end" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+        <!-- Riepilogo percentuale in stile widget -->
+        <div class="flex justify-between items-center p-5 border-b border-slate-100 bg-slate-50">
+            <div class="text-center">
+                <div class="text-xs text-slate-500 uppercase font-semibold">Partenza</div>
+                <div id="startBadge" class="text-xl font-bold text-slate-800">20%</div>
             </div>
-
-            <!-- Potenza -->
-            <div>
-                <div class="flex justify-between mb-1">
-                    <label class="text-sm font-medium text-slate-600">Potenza Erogata</label>
-                    <span id="powerVal" class="text-sm font-bold text-blue-600">6.0 kW</span>
+            <div class="flex-1 px-4 flex flex-col items-center">
+                <div class="w-full h-1 bg-slate-200 flex rounded-full relative">
+                    <div id="progressBar" class="h-1 bg-blue-500 rounded-full absolute left-0" style="width: 71%; margin-left: 20%;"></div>
                 </div>
-                <input type="range" id="power" min="2" max="7.4" step="0.1" value="6.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <div id="addedBadge" class="text-xs font-bold text-blue-600 mt-2 bg-blue-100 px-2 py-0.5 rounded-full">+71%</div>
+            </div>
+            <div class="text-center">
+                <div class="text-xs text-slate-500 uppercase font-semibold">Arrivo</div>
+                <div id="endBadge" class="text-xl font-bold text-slate-800">91%</div>
             </div>
         </div>
 
-        <div class="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-100 text-center">
-            <p class="text-sm text-slate-500 mb-1">Tempo stimato (50 kWh)</p>
-            <p id="result" class="text-3xl font-extrabold text-blue-700">00h 00m</p>
+        <!-- Dati tecnici (Griglia) -->
+        <div class="grid grid-cols-2 gap-4 p-5 bg-white">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div class="text-xs text-slate-500 mb-1 font-medium">Energia richiesta</div>
+                <div id="energyNeeded" class="text-lg font-bold text-slate-800">35.5 kWh</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div class="text-xs text-slate-500 mb-1 font-medium">Potenza effettiva</div>
+                <div id="actualPower" class="text-lg font-bold text-slate-800">5.40 kW</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 col-span-2 flex justify-between items-center">
+                <div class="text-xs text-slate-500 font-medium">Velocità di carica</div>
+                <div id="speed" class="text-lg font-bold text-green-600">+10.8 %/h</div>
+            </div>
+        </div>
+
+        <!-- Controlli (Sliders) -->
+        <div class="p-6 space-y-6 border-t border-slate-100">
+            
+            <!-- Slider Potenza -->
+            <div>
+                <div class="flex justify-between mb-2">
+                    <label class="text-sm font-semibold text-slate-700">Potenza di ricarica</label>
+                    <span id="powerVal" class="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">6.0 kW</span>
+                </div>
+                <input type="range" id="power" min="2" max="7.4" step="0.1" value="6.0" class="w-full h-2 bg-slate-200 rounded-lg">
+            </div>
+
+            <!-- Slider Partenza -->
+            <div>
+                <div class="flex justify-between mb-2">
+                    <label class="text-sm font-semibold text-slate-700">Livello di partenza (SOC)</label>
+                    <span id="startVal" class="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">20%</span>
+                </div>
+                <input type="range" id="start" min="0" max="99" value="20" class="w-full h-2 bg-slate-200 rounded-lg">
+            </div>
+
+            <!-- Slider Arrivo -->
+            <div>
+                <div class="flex justify-between mb-2">
+                    <label class="text-sm font-semibold text-slate-700">Livello di arrivo (SOC)</label>
+                    <span id="endVal" class="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">91%</span>
+                </div>
+                <input type="range" id="end" min="1" max="100" value="91" class="w-full h-2 bg-slate-200 rounded-lg">
+            </div>
+
+            <!-- Slider Capacità Batteria -->
+            <div class="pt-4 border-t border-slate-100">
+                <div class="flex justify-between mb-2">
+                    <label class="text-sm font-semibold text-slate-500">Capacità batteria</label>
+                    <span id="capacityVal" class="text-sm font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">50 kWh</span>
+                </div>
+                <input type="range" id="capacity" min="30" max="100" step="1" value="50" class="w-full h-2 bg-slate-200 rounded-lg">
+            </div>
+
         </div>
     </div>
 
     <script>
-        const capacity = 50; // kWh della batteria
-        const efficiency = 0.90; // Efficienza di trasformazione AC/DC
+        const efficiency = 0.90; // Efficienza considerata al 90% (perdite termiche)
 
         const startSlider = document.getElementById('start');
         const endSlider = document.getElementById('end');
         const powerSlider = document.getElementById('power');
-        const resultText = document.getElementById('result');
+        const capacitySlider = document.getElementById('capacity');
 
-        function calculate() {
+        function updateUI() {
             let start = parseInt(startSlider.value);
             let end = parseInt(endSlider.value);
             let power = parseFloat(powerSlider.value);
+            let capacity = parseInt(capacitySlider.value);
 
+            // Evita che la partenza superi l'arrivo
             if (start >= end) {
                 start = end - 1;
                 startSlider.value = start;
             }
 
+            // Aggiorna testi sliders
             document.getElementById('startVal').innerText = start + '%';
             document.getElementById('endVal').innerText = end + '%';
             document.getElementById('powerVal').innerText = power.toFixed(1) + ' kW';
+            document.getElementById('capacityVal').innerText = capacity + ' kWh';
 
-            const energyNeeded = capacity * (end - start) / 100;
-            const hoursDec = energyNeeded / (power * efficiency);
-            
+            // Aggiorna badge riepilogo
+            document.getElementById('startBadge').innerText = start + '%';
+            document.getElementById('endBadge').innerText = end + '%';
+            const addedPercent = end - start;
+            document.getElementById('addedBadge').innerText = '+' + addedPercent + '%';
+
+            // Aggiorna barra progresso
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = addedPercent + '%';
+            progressBar.style.marginLeft = start + '%';
+
+            // Calcoli tecnici
+            const energyNeeded = (capacity * addedPercent) / 100;
+            const actualPower = power * efficiency;
+            const hoursDec = energyNeeded / actualPower;
+            const speedPercentPerHour = (actualPower / capacity) * 100;
+
+            // Formattazione tempo
             const hours = Math.floor(hoursDec);
             const minutes = Math.round((hoursDec - hours) * 60);
 
-            resultText.innerText = `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+            // Aggiorna valori griglia e header
+            document.getElementById('timeResult').innerText = `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+            document.getElementById('kwhResultTop').innerText = `+${energyNeeded.toFixed(1)} kWh`;
+            
+            document.getElementById('energyNeeded').innerText = `${energyNeeded.toFixed(1)} kWh`;
+            document.getElementById('actualPower').innerText = `${actualPower.toFixed(2)} kW`;
+            document.getElementById('speed').innerText = `+${speedPercentPerHour.toFixed(1)} %/h`;
         }
 
-        [startSlider, endSlider, powerSlider].forEach(el => {
-            el.addEventListener('input', calculate);
+        // Aggiungi event listener a tutti gli slider
+        [startSlider, endSlider, powerSlider, capacitySlider].forEach(el => {
+            el.addEventListener('input', updateUI);
         });
 
-        calculate();
+        // Prima esecuzione
+        updateUI();
     </script>
 </body>
 </html>
