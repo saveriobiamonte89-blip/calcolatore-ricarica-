@@ -51,24 +51,24 @@
             </div>
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <div class="text-xs text-slate-500 mb-1 font-medium">Potenza effettiva</div>
-                <div id="actualPower" class="text-lg font-bold text-slate-800">5.40 kW</div>
+                <div id="actualPower" class="text-lg font-bold text-slate-800">45.00 kW</div>
             </div>
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 col-span-2 flex justify-between items-center">
                 <div class="text-xs text-slate-500 font-medium">Velocità di carica</div>
-                <div id="speed" class="text-lg font-bold text-green-600">+10.8 %/h</div>
+                <div id="speed" class="text-lg font-bold text-green-600">+90.0 %/h</div>
             </div>
         </div>
 
         <!-- Controlli (Sliders) -->
         <div class="p-6 space-y-6 border-t border-slate-100">
             
-            <!-- Slider Potenza -->
+            <!-- Slider Potenza (Modificato per arrivare fino a 300 kW con step di 1 kW) -->
             <div>
                 <div class="flex justify-between mb-2">
                     <label class="text-sm font-semibold text-slate-700">Potenza di ricarica</label>
-                    <span id="powerVal" class="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">6.0 kW</span>
+                    <span id="powerVal" class="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">50 kW</span>
                 </div>
-                <input type="range" id="power" min="2" max="7.4" step="0.1" value="6.0" class="w-full h-2 bg-slate-200 rounded-lg">
+                <input type="range" id="power" min="2" max="300" step="1" value="50" class="w-full h-2 bg-slate-200 rounded-lg">
             </div>
 
             <!-- Slider Partenza -->
@@ -95,7 +95,7 @@
                     <label class="text-sm font-semibold text-slate-500">Capacità batteria</label>
                     <span id="capacityVal" class="text-sm font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">50 kWh</span>
                 </div>
-                <input type="range" id="capacity" min="30" max="100" step="1" value="50" class="w-full h-2 bg-slate-200 rounded-lg">
+                <input type="range" id="capacity" min="30" max="150" step="1" value="50" class="w-full h-2 bg-slate-200 rounded-lg">
             </div>
 
         </div>
@@ -124,7 +124,7 @@
             // Aggiorna testi sliders
             document.getElementById('startVal').innerText = start + '%';
             document.getElementById('endVal').innerText = end + '%';
-            document.getElementById('powerVal').innerText = power.toFixed(1) + ' kW';
+            document.getElementById('powerVal').innerText = power + ' kW';
             document.getElementById('capacityVal').innerText = capacity + ' kWh';
 
             // Aggiorna badge riepilogo
